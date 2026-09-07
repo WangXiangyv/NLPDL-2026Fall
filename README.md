@@ -1,12 +1,12 @@
-# NLPDL - Fall 2025 Homework
+# NLPDL - Fall 2026 Homework
 
-Welcome to the official repository for the NLP course for Fall 2025. This repository contains all the homework assignments for the course.
+Welcome to the official repository for the NLPDL course for Fall 2026. This repository contains all the homework assignments for the course.
 
 ## Repository Structure
 This repository is organized into directories, with each directory corresponding to a specific homework assignment.
 
 ```bash
-NLPDL-2025Fall/
+NLPDL-2026Fall/
 ├── .gitignore
 ├── README.md
 ├── hw0_hello_world/
@@ -23,7 +23,7 @@ NLPDL-2025Fall/
 
 - `hw0_hello_world/`: An introductory assignment to familiarize you with the homework submission and testing process.
 
-- `hw1_...`/: The first main assignment (to be added).
+- `hw1_...`/: The first main assignment.
 
 - `...`: Subsequent assignments.
 
@@ -67,7 +67,7 @@ Each homework directory is its own uv project. Work inside the assignment direct
 ```bash
 # Example: Homework 0
 cd hw0_hello_world
-uv sync   # creates .venv/ in hw0_hello_world and installs deps
+uv sync   # creates .venv/ in hw0_hello_world and installs dependencies
 
 # Example: Homework 1
 cd ../hw1_bpe_and_lm
