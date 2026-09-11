@@ -3,7 +3,7 @@ name = "basics"
 version = "1.0.5"
 description = "CS336 Assignment 1"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "einops>=0.8.1", # tensor operations
     "einx>=0.3.0", # more general tensor operations

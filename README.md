@@ -143,4 +143,11 @@ Alternative unified helper (from repo root):
 ./submit_hw.sh <hw_directory> <LASTNAME> <FIRSTNAME> <STUDENTID>
 ```
 
+If you have already run the tests separately and only want to build the ZIP,
+append `--notest`. Pure packaging does not invoke `uv` or read `uv.lock`:
+
+```bash
+./submit_hw.sh <hw_directory> <LASTNAME> <FIRSTNAME> <STUDENTID> --notest
+```
+
 Refer to the guidelines for exclusions and large files.

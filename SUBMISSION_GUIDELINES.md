@@ -50,6 +50,10 @@ cd ../hw1_bpe_and_lm && ./make_submission.sh SMITH JOHN 11223344
 ```
 the scripts run tests and produce `hwX_submission_LASTNAME_FIRSTNAME_STUDENTID.zip`, printing contents for verification.
 
+If tests were already run separately, append `--notest` to either submission
+command to perform packaging only. In this mode the script does not invoke
+`uv`, so packaging is independent of the assignment's `uv.lock` file.
+
 ## General Submission Format
 
 For any homework assignment `hwX_name`, your submission should be a ZIP file named:
@@ -91,6 +95,5 @@ Use the provided `submit_hw.sh` in the repo root. It cleans caches and respects 
   - A: No, do not modify the provided test files. Your implementation should pass the original tests as provided.
 - **Q: What if I added extra dependencies?**
   - A: Contact the course staff before submission. Generally, you should only use the dependencies specified in the assignment.
-
 
 

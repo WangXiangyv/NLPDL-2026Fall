@@ -1,0 +1,3 @@
+# Large grading fixtures and reference snapshots are not student source code.
+tests/fixtures/
+tests/_snapshots/
