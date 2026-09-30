@@ -575,9 +575,11 @@ def run_train_bpe(
         input_path (str | os.PathLike): Path to BPE tokenizer training data.
         vocab_size (int): Total number of items in the tokenizer's vocabulary (including special tokens).
         special_tokens (list[str]): A list of string special tokens to be added to the tokenizer vocabulary.
-            These strings will never be split into multiple tokens, and will always be
-            kept as a single token. If these special tokens occur in the `input_path`,
-            they are treated as any other string.
+            Occurrences in the input corpus must be removed before pre-tokenization,
+            and the text on either side must be pre-tokenized separately so that no
+            BPE merge can cross the boundary. The special tokens are added as complete
+            vocabulary entries and count toward vocab_size, but their occurrences in
+            the corpus do not participate in pair counting or BPE merges.
 
     Returns:
         tuple[dict[int, bytes], list[tuple[bytes, bytes]]]:

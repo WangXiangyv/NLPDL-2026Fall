@@ -305,7 +305,7 @@ This chunking will always be valid, since we never want to merge across document
 > 
 > - `input_path: str` Path to a text file with BPE tokenizer training data.
 > - `vocab_size: int` A positive integer that defines the maximum final vocabulary size (including the initial byte vocabulary, vocabulary items produced from merging, and any special tokens).
-> - `special_tokens: list[str]` A list of strings to add to the vocabulary. These special tokens do not otherwise affect BPE training.
+> - `special_tokens: list[str]` A list of strings to add as complete vocabulary entries, counting toward `vocab_size`. Occurrences in the input corpus must be removed before pre-tokenization, and the text on either side must be pre-tokenized separately so that no BPE merge can cross the boundary. These occurrences do not participate in pair counting or BPE merges.
 > 
 > Your BPE training function should return the resulting vocabulary and merges:
 > 
