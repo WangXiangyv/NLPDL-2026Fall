@@ -1539,14 +1539,16 @@ Note that $t$ starts at 1. You will now implement this optimizer.
 >
 > Let us compute how much memory and compute running AdamW requires. Assume we are using float32 for every tensor.
 >
-> (a) How much peak memory does running AdamW require? Decompose your answer based on the memory usage of the parameters, activations, gradients, and optimizer state. Express your answer in terms of the `batch_size` and the model hyperparameters (`vocab_size`, `context_length`, `num_layers`, `d_model`, `num_heads`). Assume $d_{ff} = 4 \times d_{model}$.
+> For all parts of this problem, use the three-matrix SwiGLU architecture defined in §3.3.2, with the exercise-specific assumption $d_{ff} = 4 \times d_{model}$. Include all three weight matrices in parameter, gradient, and optimizer-state accounting, and all three projections and the elementwise gating multiplication in model FLOP accounting. The simplified activation-memory accounting below does not change these requirements.
+>
+> (a) How much peak memory does running AdamW require? Decompose your answer based on the memory usage of the parameters, activations, gradients, and optimizer state. Express your answer in terms of the `batch_size` and the model hyperparameters (`vocab_size`, `context_length`, `num_layers`, `d_model`, `num_heads`).
 >
 > For simplicity, when calculating memory usage of activations, consider only the following components:
 >
 > * Transformer block
 >   * RMSNorm(s)
 >   * Multi-head self-attention sublayer: QKV projections, $Q^⊤K$ matrix multiply, softmax, weighted sum of values, output projection.
->   * Position-wise feed-forward: $W_1$ matrix multiply, SiLU, $W_2$ matrix multiply
+>   * Position-wise feed-forward: count the outputs of $W_1 x$, $\text{SiLU}(W_1 x)$, $W_3 x$, the elementwise gating product $\text{SiLU}(W_1 x) \odot W_3 x$, and the final $W_2$ projection.
 > * final RMSNorm
 > * output embedding
 > * cross-entropy on logits
