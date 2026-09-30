@@ -262,7 +262,24 @@ Let's train a byte-level BPE tokenizer on the TinyStories dataset. Before you st
 
 **Parallelizing pre-tokenization.** You will find that a major bottleneck is the pre-tokenization step. You can speed up pre-tokenization by parallelizing your code with the built-in library `multiprocessing`. Concretely, we recommend that in parallel implementations of pre-tokenization, you chunk the corpus while ensuring your chunk boundaries occur at the beginning of a special token. You are free to use the starter code at the following link verbatim to obtain chunk boundaries, which you can then use to distribute work across your processes:
 
-[https://github.com/linhaowei1/NLPDL-2025Fall/hw1/basics/pretokenization_example.py](https://github.com/linhaowei1/NLPDL-2025Fall/hw1/basics/pretokenization_example.py)
+[basics/pretokenization_example.py](basics/pretokenization_example.py)
+
+Import the helper as shown below, replacing `path/to/corpus.txt` with your input file path:
+
+```python
+from basics.pretokenization_example import find_chunk_boundaries
+
+with open("path/to/corpus.txt", "rb") as f:
+    num_processes = 4
+    boundaries = find_chunk_boundaries(f, num_processes, b"<|endoftext|>")
+
+    # This serial example can be parallelized by sending each start/end pair
+    # to a set of processes.
+    for start, end in zip(boundaries[:-1], boundaries[1:]):
+        f.seek(start)
+        chunk = f.read(end - start).decode("utf-8", errors="ignore")
+        # Run pre-tokenization on your chunk and store the counts for each pre-token.
+```
 
 This chunking will always be valid, since we never want to merge across document boundaries. For the purposes of the assignment, you can always split in this way. Don't worry about the edge case of receiving a very large corpus that does not contain `<|endoftext|>`.
 
