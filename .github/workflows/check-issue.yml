@@ -1,0 +1,23 @@
+name: Check issue format
+'on':
+  issues:
+    types:
+    - opened
+    - edited
+    - reopened
+permissions:
+  issues: write
+concurrency:
+  group: check-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Validate title and checklist
+      uses: actions/github-script@v9
+      with:
+        script: "const params = { ...context.repo, issue_number: context.issue.number };\n// Fetch current content, including edits made while this run was queued.\nconst { data: issue } = await github.rest.issues.get(params);\nif (issue.pull_request) return;\n\nconst errors = [];\nconst title = (issue.title || '').trim();\nconst match = title.match(/^\\[(bug|typo|suggestion|other)\\] \\[lab:([1-3])\\] (\\S.*)$/u);\nif (!match) {\n  errors.push('标题须为 `[bug|typo|suggestion|other] [lab:1|2|3] 问题简述`，例如 `[bug] [lab:2] 测试命令中的路径错误`。');\n} else if (match[3].trim() === '问题简述') {\n  errors.push('请将标题中的“问题简述”替换为具体的问题概述。');\n}\n\nconst required = [\n  '我已经搜索过已有 Issue，确认没有重复的问题。',\n  '我已查看课程仓库的最新版本，确认问题或建议仍然适用。',\n  '我已将标题中的 `[lab:n]` 改为 `[lab:1]`、`[lab:2]` 或 `[lab:3]`，并填写问题简述。'\n];\n// Ignore examples in comments and fenced code blocks.\nconst body = (issue.body || '').replace(/<!--[^]*?-->/g, '').replace(/^\\s*(`{3,}|~{3,})[^\\n]*\\n[^]*?^\\s*\\1\\s*$/gm, '');\nconst section = body.match(/^##[ \\\
+          t]+提交前检查[ \\t]*\\r?\\n([^]*?)(?=^##[ \\t]+|$(?![^]))/m);\nconst checklist = section ? section[1] : '';\nconst normalize = text => text.replace(/`/g, '').trim();\nconst tasks = [...checklist.matchAll(/^[ \\t]*[-*][ \\t]+\\[([ xX])\\][ \\t]+(.+?)[ \\t]*\\r?$/gm)];\nfor (const item of required) {\n  const found = tasks.filter(task => normalize(task[2]) === normalize(item));\n  if (found.length !== 1 || !/[xX]/.test(found[0][1])) {\n    errors.push(`请保留并勾选检查项：${item}`);\n  }\n}\n\nconst marker = '<!-- course-issue-validation -->';\nconst comments = await github.paginate(github.rest.issues.listComments, { ...params, per_page: 100 });\nconst previous = comments.find(comment => comment.user?.login === 'github-actions[bot]' && comment.body?.includes(marker));\nif (errors.length) {\n  const message = `${marker}\\n❌ Issue 格式检查未通过，将自动关闭\\n\\n${errors.map(error => `- ${error}`).join('\\n')}\\n\\n请参照 [Issue 提交规范](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/HEAD/issue-format.md)\
+          \ 编辑本 Issue 的标题或正文，保存后会自动重新检查。检查通过后，请手动重新打开本 Issue。`;\n  if (previous) {\n    if (previous.body !== message) await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body: message });\n  } else {\n    await github.rest.issues.createComment({ ...params, body: message });\n  }\n  if (issue.state === 'open') {\n    await github.rest.issues.update({ ...params, state: 'closed', state_reason: 'not_planned' });\n  }\n  core.setFailed('Issue 标题或 checklist 不符合要求，已关闭。');\n} else {\n  // Update an earlier reminder; valid new issues need no comment.\n  const message = `${marker}\\n✅ Issue 格式检查已通过：标题和三项 checklist 均符合要求。${issue.state === 'closed' ? '\\n\\n如需继续处理，请手动重新打开本 Issue。' : ''}`;\n  if (previous && previous.body !== message) {\n    await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body: message });\n  }\n  core.info('Issue title and checklist are valid.');\n}\n"

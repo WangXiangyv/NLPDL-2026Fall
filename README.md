@@ -3,6 +3,7 @@
 Welcome to the official repository for the NLPDL course for Fall 2026. This repository contains all the homework assignments for the course.
 
 ## Repository Structure
+
 This repository is organized into directories, with each directory corresponding to a specific homework assignment.
 
 ```bash
@@ -42,6 +43,7 @@ Each homework directory is a self-contained Python package and includes:
 This project uses [uv](https://docs.astral.sh/uv/) for Python package management. uv is a fast Python package and project manager that provides better dependency resolution and faster installations compared to pip.
 
 **Install uv:**
+
 ```bash
 # On macOS and Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -56,6 +58,7 @@ pip install uv
 ### Setup Instructions
 
 1. **Clone the repository:**
+
 ```bash
 git clone <repository_url>
 cd <repo_name>
@@ -151,3 +154,14 @@ append `--notest`. Pure packaging does not invoke `uv` or read `uv.lock`:
 ```
 
 Refer to the guidelines for exclusions and large files.
+
+## Reporting Issues
+
+To report a problem or suggestion about course content or a lab, open an issue from **Issues → New issue** and pick the matching template. Each distinct problem should be its own issue.
+
+Follow [issue-format.md](issue-format.md) for the required title and body format. Issues that do not match the format are checked automatically and closed. In short:
+
+- Title: `[type] [lab:n] short summary`, where `type` is `bug`, `typo`, `suggestion`, or `other`, and `n` is `1`, `2`, or `3`.
+- Body: keep the four sections from the template (pre-submission checklist, files, location, and the problem). Mark all three checklist items `- [x]` before you submit.
+
+If an issue is closed by the check, edit the original issue to fix it instead of opening a duplicate. See [issue-format.md](issue-format.md) for examples and the full rules.
