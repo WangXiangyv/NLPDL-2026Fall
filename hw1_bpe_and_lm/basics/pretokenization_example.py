@@ -26,10 +26,12 @@ def find_chunk_boundaries(
     chunk_boundaries[-1] = file_size
 
     mini_chunk_size = 4096  # Read ahead by 4k bytes at a time
+    overlap_size = max(0, len(split_special_token) - 1)
 
     for bi in range(1, len(chunk_boundaries) - 1):
         initial_position = chunk_boundaries[bi]
         file.seek(initial_position)  # Start at boundary guess
+        suffix = b""
         while True:
             mini_chunk = file.read(mini_chunk_size)  # Read a mini chunk
 
@@ -38,12 +40,15 @@ def find_chunk_boundaries(
                 chunk_boundaries[bi] = file_size
                 break
 
-            # Find the special token in the mini chunk
-            found_at = mini_chunk.find(split_special_token)
+            # Include the previous suffix so tokens spanning reads can be found.
+            buffer = suffix + mini_chunk
+            buffer_position = initial_position - len(suffix)
+            found_at = buffer.find(split_special_token)
             if found_at != -1:
-                chunk_boundaries[bi] = initial_position + found_at
+                chunk_boundaries[bi] = buffer_position + found_at
                 break
-            initial_position += mini_chunk_size
+            suffix = buffer[-overlap_size:] if overlap_size else b""
+            initial_position += len(mini_chunk)
 
     # Make sure all boundaries are unique, but might be fewer than desired_num_chunks
     return sorted(set(chunk_boundaries))
