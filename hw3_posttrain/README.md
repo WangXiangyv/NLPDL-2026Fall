@@ -886,7 +886,16 @@ You will use this prompt for both training and validation, and will change your 
 >
 > - **Deliverable:** Report the validation answer reward curves for both the R1-Zero prompt and the question-only prompt. How do metrics compare, including any other metrics that have a noticeable trend such as entropy, response length, and gradient norm? Try to explain your findings.
 
-## 7. Using LLMs for Scientific Discovery: The Kissing Number Challenge
+## 7. Using LLMs for Scientific Discovery
+
+For Problem 17, choose **one** of the following options (10 points total):
+
+1. **Option A: The Kissing Number Challenge.** Follow Sections 7.1–7.4 below.
+2. **Option B: Your Own Scientific Task.** Follow Section 7.5 to design a verifiable task and package it in the Harbor format.
+
+You only need to submit the deliverables for the option you choose. Both options carry the same credit.
+
+**Option A: The Kissing Number Challenge**
 
 In the previous sections, you trained models on tasks where the "ground truth" is known (i.e., the answer to a math problem). In this final, open-ended section, you will use a language model for a more challenging task: **scientific discovery**. Your goal is to find a new *lower bound* for a famous mathematical problem where the optimal answer is unknown.
 
@@ -981,3 +990,45 @@ This is a powerful test-time method that uses the verifier as your "selection me
 >    - **Reflection:** What did you learn? What was the most effective part of your strategy?
 >
 > **Grading**: This problem is open-ended. Your grade will be based on the effort, creativity, and rigor demonstrated in your report and conversation log, as well as on the final score $|C|$ you achieve. A valid submission with a non-trivial score ($|C| > 11$) and a clear report will receive a good grade. Exceptional scores will receive bonus points.
+
+### 7.5 Option B: Your Own Scientific Task
+
+In this option, you will choose a scientific or mathematical problem that interests you, turn it into a verifiable task, and study where language models struggle. For example, you could construct a mathematical object satisfying a set of constraints, recover parameters from simulated observations, or solve an optimization problem.
+
+**Task design.** Design the task yourself and explain your contribution to the problem setting, data, constraints, or verification. You may build on existing scientific methods or public data; cite the sources you use. State the task clearly, including the inputs, expected outputs, and success criteria.
+
+**Reference solution and verifier.** Provide a correct reference solution and an automatic verifier. Depending on the task, verification may use a reference answer, a numerical tolerance, or validity conditions and an objective threshold. Multiple correct solutions are allowed. Check that your reference solution passes the verifier and that an incorrect or missing output fails.
+
+**Model baselines.** Evaluate your task using direct prompting on **at least three different LLMs**, and document **failure or clear difficulty on each model**. Use reasonably capable models, such as MiMo or other recent models you have access to. Give each model the task description and required inputs, use reasonable generation budgets, and evaluate its answer or generated program without iterative hints or verifier feedback. Record the exact model names/versions, prompts, generation settings, outputs, and verifier results for all baseline attempts. Explain the observed difficulty using concrete results, such as incorrect answers, violated constraints, or poor scores relative to the stated target. You may then try iterative refinement, Best-of-N, or tool use and discuss whether they help.
+
+**Harbor implementation.** Place your task in `data/scientific_task/` using the [Harbor task format](https://docs.harborframework.com/tasks/overview):
+
+```text
+data/scientific_task/
+├── instruction.md          # Task description, inputs, outputs, and success criteria
+├── task.toml               # Task configuration and resource limits
+├── environment/
+│   └── Dockerfile          # Dependencies and task inputs
+├── solution/
+│   └── solve.sh            # Reference solution
+└── tests/
+    └── test.sh             # Automatic verifier
+```
+
+Include any additional data or scripts needed to run the task. The verifier must write its numerical reward to `/logs/verifier/reward.txt` or `/logs/verifier/reward.json`, as described in the [Harbor verifier documentation](https://docs.harborframework.com/tasks/verifier). The task should run without manual steps. From `hw3_posttrain/`, verify that your reference solution passes using:
+
+```bash
+harbor run -p data/scientific_task -a oracle
+```
+
+You can follow the [Harbor task tutorial](https://docs.harborframework.com/tutorials/create-a-task) for setup and examples.
+
+> Problem 17, Option B: Your Own Scientific Task (10 points)
+>
+> **Deliverables**:
+>
+> 1. **`data/scientific_task/`**: A complete, runnable Harbor task, including the reference solution and automatic verifier.
+> 2. **`conversation_log.json`**: The entire interaction log with the LLMs, including the baseline attempts on at least three different models and any subsequent refinement. Include the model names/versions and generation settings.
+> 3. **`report.md`**: A 1-2 page report explaining the scientific motivation, your contribution to the task design, the reference solution and verification criteria, and the baseline results and failure analysis for each model. Include the result of the Harbor oracle run and discuss any further methods you tried.
+>
+> **Grading**: Your grade will be based on the scientific motivation and task design, the correctness of the reference solution and verifier, the rigor of the model experiments and analysis, and the completeness of the runnable Harbor task.
