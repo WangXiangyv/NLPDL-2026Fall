@@ -201,11 +201,11 @@ def main():
 
     ## TODO: initialize wandb and set config
     wandb.init()  # add your project and record name
-    wandb.config = {
+    wandb.config.update({
         "epoch": None,
         "batch_size": None,
         "lr": None
-    }  # set your config
+    })  # set your config
 
     if train_args.do_train:
         logger.info("*** Train ***")

@@ -23,7 +23,7 @@ def test_compute_bleu():
         0.1900,  # `nltk` BLEU score + `nltk.word_tokenize`, no smoothing
         0.1775,  # `nltk` BLEU score + `str.split()`, no smoothing
     )
-    assert any(abs(b - e) < 1e-3 for b, e in zip(bleu_score, expected_bleu))
+    assert any(abs(bleu_score - e) < 1e-3 for e in expected_bleu)
 
 
 def test_compute_rouge():
@@ -44,7 +44,7 @@ def test_compute_rouge():
         0.6667,  # `rouge-score` ROUGE-L score
         0.6458,  # `rouge` ROUGE-L score
     )
-    assert any(abs(r - e) < 1e-3 for r, e in zip(rouge_l_score, expected_rouge_l))
+    assert any(abs(rouge_l_score - e) < 1e-3 for e in expected_rouge_l)
 
 
 
