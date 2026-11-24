@@ -919,7 +919,7 @@ If this condition holds, it can be proven that unit spheres centered at the poin
 
 To help you, we are providing several resources:
 
-1. **Free API Access:** You will be given free API credits for **Qwen3-32B**, a highly capable model. You are encouraged to use this model, but you may also use any other model you have access to. NOTICE: we will not refund any API cost, and we appreciate you using cheap models to achieve good results, so we don't hope you spend a lot of money on this task.
+1. **Free API Access:** **Xiaomi MiMo** is sponsoring API credits for this course. Each enrolled student has been assigned an API key with approximately **RMB 1,000 in credits** to support upcoming assignments. To retrieve your key, connect to the **campus network** and visit [the API key portal](http://10.129.160.194:8000/), then enter your student ID and name. If you have any questions, please contact the instructor or a teaching assistant.
 
 2. **Starter Program:** In `data/kissing_number/program.py`, you will find a (very simple) starter program that outputs a set of vectors. This is the file you will modify.
 
