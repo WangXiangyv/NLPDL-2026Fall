@@ -45,7 +45,7 @@ def evaluate_model(model_name, dataset_name, split="test"):
     references = None
     candidates = None
 
-    candidates = inference(model, tokenizer, dataset["text"])
+    candidates = inference(model, tokenizer, dataset["dialogue"])
 
     # Compute evaluation metrics
     bleu = compute_bleu(references, candidates)

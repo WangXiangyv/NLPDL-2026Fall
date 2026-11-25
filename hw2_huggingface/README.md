@@ -31,10 +31,10 @@ uv run --directory hw2_huggingface pytest . --ignore=LLaMA-Factory
 
 `uv` will automatically resolve and activate the environment specified by this assignment’s `pyproject.toml`.
 
-For task 4 (LLaMA-Factory), just follow its README.md.
+For task 4, use LLaMA-Factory **v0.9.3** and follow the README.md for that version.
 
 ```sh
-git clone https://github.com/hiyouga/LLaMA-Factory.git
+git clone --branch v0.9.3 --single-branch https://github.com/hiyouga/LLaMA-Factory.git
 cd LLaMA-Factory
 
 uv sync --extra torch --extra metrics --extra deepspeed --prerelease=allow
@@ -104,11 +104,11 @@ def get_dataset(dataset_name: str, sep_token: str = '<SEP>'):
 
    > Aspect-based sentiment analysis (ABSA) is a text analysis technique that categorizes data by aspect and identifies the sentiment attributed to each one. Aspect-based sentiment analysis can be used to analyze customer feedback by associating specific sentiments with different aspects of a product or service.
 
-   Here we use data from SemEval-2014 Task 4 (see [google drive](https://drive.google.com/drive/folders/1H5rmibrg4VfEvM6uqobkrZlGla3xk78-?usp=share_link)). Prepare the dataset as a `DatasetDict` object with 'train' and 'test' items (you don't need to care about the dev set), both of which are `Dataset` object that contains `text` and `label`.
+   Here we use data from SemEval-2014 Task 4 (see [google drive](https://drive.google.com/drive/folders/1H5rmibrg4VfEvM6uqobkrZlGla3xk78-?usp=share_link)). Prepare the dataset as a `DatasetDict` object with 'train' and 'test' items (you don't need to care about the dev set), both of which are `Dataset` object that contains `text` and `labels`.
 
-   - Hint 1. `text` and `label` are actually two lists of data (the text list should contain text strings, and label list contains integers $0\sim$#label-1).
+   - Hint 1. The `text` column contains strings, and the `labels` column contains integers from 0 to the number of classes minus 1.
    - Hint 2. Refer to more ABSA task introduction to know how to prepare `text`. There are many ways to format inputs, and you can use `sep_token` to process the raw text.
-   - Hint 3. In this dataset, `text` is the term and the description, and `label` is the sentiment polarity.
+   - Hint 3. In this dataset, `text` is the term and the description, and `labels` contains the sentiment polarity for each example.
 
    b. Implement `acl_sup` dataset for citation intent classification.
 
@@ -116,10 +116,9 @@ def get_dataset(dataset_name: str, sep_token: str = '<SEP>'):
 
    c. Implement `agnews_sup` dataset.
 
-   The agnews dataset is a bit large, here we just use its provided test dataset.
+   Use only the original test split of [AG News](https://huggingface.co/datasets/fancyzhx/ag_news).
 
-   - Remove the title, use the `description` as input text, predict the label.
-     - if you use `load_dataset` from huggingface, then you don't need to process `text`, since the title is already removed and the `description` is `text`.
+   - Use the full Hugging Face `text` field as input. It contains the title and description joined by a single space. If you load the original CSV instead, join `title` and `description` in the same way.
    - Random split the dataset into training and test set with **ratio 9:1** using `train_test_split` API from huggingface `datasets` with `random seed = 2025`.
 
 3. Implement the **few-shot version** of the above tasks: named `restaurant_fs`, `laptop_fs`, `acl_fs`, `agnews_fs`. To prepare a few-shot dataset with appropriate size, you can refer to [this paper](https://arxiv.org/pdf/2109.04332.pdf) for its experimental setup.
@@ -161,7 +160,7 @@ After you finish the script,
 - To make the results reliable, you need to run the same experiments several times and report the standard deviation.
 - Adjust the batch size, epoch number and learning rate to make your results converge stably.
   > These models are highly capable and have been pre-trained on a large scale of data. Set a **small learning rate** and run **few epoches** to avoid overfitting or even catastrophic forgetting!
-- It is recommended to write a shell script to avoid entering parameters every time. Don't forget to set `HF_ENDPONIT` in your shell script!
+- It is recommended to write a shell script to avoid entering parameters every time. Don't forget to set `HF_ENDPOINT` in your shell script!
 
 ## Task 3: PEFT
 
