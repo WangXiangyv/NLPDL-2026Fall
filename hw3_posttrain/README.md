@@ -8,7 +8,7 @@ In this assignment, you will gain some hands-on experience with training languag
 
 1. Zero-shot prompting baseline for the GSM8K dataset. Apply Best-of-N to see the strength of test-time scaling.
 2. Group-Relative Policy Optimization (GRPO) for improving reasoning performance with verified rewards.
-3. Try your best to use language models for scientific discovery.
+3. Design a verifiable scientific or mathematical task and analyze where language models fail on it.
 
 ## 2. Measuring Zero-shot GSM8K Performance
 
@@ -886,120 +886,17 @@ You will use this prompt for both training and validation, and will change your 
 >
 > - **Deliverable:** Report the validation answer reward curves for both the R1-Zero prompt and the question-only prompt. How do metrics compare, including any other metrics that have a noticeable trend such as entropy, response length, and gradient norm? Try to explain your findings.
 
-## 7. Using LLMs for Scientific Discovery
+## 7. Finding LLM Failures on Scientific Tasks
 
-For Problem 17, choose **one** of the following options (10 points total):
-
-1. **Option A: The Kissing Number Challenge.** Follow Sections 7.1–7.4 below.
-2. **Option B: Your Own Scientific Task.** Follow Section 7.5 to design a verifiable task and package it in the Harbor format.
-
-You only need to submit the deliverables for the option you choose. Both options carry the same credit.
-
-**Option A: The Kissing Number Challenge**
-
-In the previous sections, you trained models on tasks where the "ground truth" is known (i.e., the answer to a math problem). In this final, open-ended section, you will use a language model for a more challenging task: **scientific discovery**. Your goal is to find a new *lower bound* for a famous mathematical problem where the optimal answer is unknown.
-
-### 7.1 The Problem: Kissing Number in 11 Dimensions
-
-The **kissing number** $\tau_d$ in $d$ dimensions is the maximum number of non-overlapping unit spheres that can all simultaneously touch (or "kiss") a central unit sphere of the same size. Finding the exact value of $\tau_d$ is a notoriously difficult problem. The values are only known for $d = 1, 2, 3, 4, 8, 24$. For $d=11$, the exact value is unknown, but the bound is known to be $595 \le \tau_{11} \le 870$.
-
-Your task is to use an LLM to find a large set of vectors that proves a strong lower bound for $\tau_{11}$.
-
-### 7.2 Your Task: A Verifiable Construction
-
-You will construct a set of integer vectors $C$ in $\mathbb{R}^{11}$ (i.e., $C \subset \mathbb{Z}^{11}$) such that $0 \notin C$ and the following condition holds:
-
-$$\min_{x \neq y \in C} \|x - y\| \geq \max_{x \in C} \|x\|$$
-
-If this condition holds, it can be proven that unit spheres centered at the points $\{2x/\|x\| : x \in C\}$ form a valid kissing configuration. This means you will have established a new lower bound, $\tau_{11} \geq |C|$.
-
-**Your score is simply $|C|$, the number of vectors in your set.**
-
-### 7.3 Resources and Evaluation
-
-To help you, we are providing several resources:
-
-1. **Free API Access:** **Xiaomi MiMo** is sponsoring API credits for this course. Each enrolled student has been assigned an API key with approximately **RMB 1,000 in credits** to support upcoming assignments. To retrieve your key, connect to the **campus network** and visit [the API key portal](http://10.129.160.194:8000/), then enter your student ID and name. If you have any questions, please contact the instructor or a teaching assistant.
-
-2. **Starter Program:** In `data/kissing_number/program.py`, you will find a (very simple) starter program that outputs a set of vectors. This is the file you will modify.
-
-3. **Verifier:** In `data/kissing_number/evaluator.py`, we provide a verifier script. You can run it from your terminal:
-
-   Bash
-
-   ```
-   python data/kissing_number/evaluator.py data/kissing_number/program.py
-   ```
-
-   The evaluator will run your `program.py` in a sandboxed environment, extract the set of vectors $C$, and check the condition. It will output metrics, including `num_points` ($|C|$), `dimension` (must be 11), and `validity` (1.0 if the condition holds, 0.0 otherwise). Your score is `num_points` *if and only if* `validity` is 1.0.
-
-### 7.4 Suggested Approaches
-
-This is an open-ended problem. You can use any method you like. Here are some suggestions inspired by the techniques in this assignment and recent research.
-
-1. Baseline: Simple Prompting
-
-Start by simply asking the model (e.g., Qwen3-32B) to solve the problem.
-
-> **Prompt:** "I need to find a set of integer vectors C in 11 dimensions such that 0 is not in C and $\min_{x \neq y \in C} \|x - y\| \geq \max_{x \in C} \|x\|$. My score is the number of vectors in C. Please write a Python program that defines a global variable `points` as a list of such vectors."
-
-Run the output through the evaluator. It will likely fail or give a very small score.
-
-2. Agentic Refinement
-
-This is where the real discovery begins. Treat the evaluator as a tool in an agentic loop (similar to the method in the paper [arXiv:2507.15855]).
-
-- **Step 1: Generate.** Prompt the LLM to generate a Python script with a candidate set `points`.
-
-- **Step 2: Verify.** Run `evaluator.py` and get the feedback.
-
-- **Step 3: Refine (Loop).**
-
-  - **If Failed (validity: 0.0):** The evaluator will give a specific error, e.g., `"Minimum squared distance 36 < maximum squared norm 40"`. Copy this *exact error* back into your prompt.
-
-    > **Prompt:** "Your previous attempt failed with this error: `Minimum squared distance 36 < maximum squared norm 40`. This means the condition was violated. Please analyze your set of vectors and propose a new, corrected set that fixes this error."
-
-  - **If Succeeded (validity: 1.0):** You have a valid lower bound! Now, try to improve it.
-
-    > **Prompt:** "Your previous set of vectors was valid and achieved a score of [Your Score]. This is great! Now, can you try to *add more vectors* to this set while still satisfying the condition? For example, can you find a new vector `z` such that its norm is no more than the current max norm, and its distance to all other vectors is at least that max norm?"
-
-Repeat this loop, using your conversation history to build upon previous successes and learn from failures. This is a form of manual, verifier-guided search.
-
-3. Best-of-N with a Verifier
-
-You can apply the Best@N idea from Section 3.3.
-
-1. Generate $N$ different programs/vector sets from the LLM (e.g., using a high temperature or different "seed" prompts).
-2. Run the `evaluator.py` on all $N$ of them.
-3. Your "best" sample is the one that has `validity: 1.0` and the highest `num_points`.
-
-This is a powerful test-time method that uses the verifier as your "selection mechanism" instead of log-likelihoods.
-
-4. Hybrid Methods (you can combine Best-of-N with any method)
-
-> Problem 17: Kissing Number Challenge (10 points)
->
-> **Deliverables**:
->
-> 1. **`program.py`**: Your final, best-performing Python script located in `data/kissing_number/program.py`. It must be runnable by `evaluator.py` and output your best vector set $C$.
-> 2. **`conversation_log.json`**: The *entire conversation log* (as a JSON dict) from your interactions with the LLM(s). This is mandatory to show your work and how you used the model for discovery. 
-> 3. **`report.md`**: A 1-2 page report detailing:
->    - **Methodology:** What approach(es) did you use? (e.g., "Iterative refinement loop with Qwen3-32B," "Best@N with verifier," etc.).
->    - **Process:** Describe your "journey." What was your initial score? What was your final score? Show 1-2 examples of prompts that led to breakthroughs (or interesting failures).
->    - **Final Result:** State your final score ($|C|$) for $d=11$.
->    - **Reflection:** What did you learn? What was the most effective part of your strategy?
->
-> **Grading**: This problem is open-ended. Your grade will be based on the effort, creativity, and rigor demonstrated in your report and conversation log, as well as on the final score $|C|$ you achieve. A valid submission with a non-trivial score ($|C| > 11$) and a clear report will receive a good grade. Exceptional scores will receive bonus points.
-
-### 7.5 Option B: Your Own Scientific Task
-
-In this option, you will choose a scientific or mathematical problem that interests you, turn it into a verifiable task, and study where language models struggle. For example, you could construct a mathematical object satisfying a set of constraints, recover parameters from simulated observations, or solve an optimization problem.
+Choose a scientific or mathematical problem that interests you and turn it into a verifiable task. Your goal is to show where language models struggle when prompted directly and explain what went wrong. For example, you could construct a mathematical object satisfying a set of constraints, recover parameters from simulated observations, or solve an optimization problem.
 
 **Task design.** Design the task yourself and explain your contribution to the problem setting, data, constraints, or verification. You may build on existing scientific methods or public data; cite the sources you use. State the task clearly, including the inputs, expected outputs, and success criteria.
 
 **Reference solution and verifier.** Provide a correct reference solution and an automatic verifier. Depending on the task, verification may use a reference answer, a numerical tolerance, or validity conditions and an objective threshold. Multiple correct solutions are allowed. Check that your reference solution passes the verifier and that an incorrect or missing output fails.
 
 **Model baselines.** Evaluate your task using direct prompting on **at least three different LLMs**, and document **failure or clear difficulty on each model**. Use reasonably capable models, such as MiMo or other recent models you have access to. Give each model the task description and required inputs, use reasonable generation budgets, and evaluate its answer or generated program without iterative hints or verifier feedback. Record the exact model names/versions, prompts, generation settings, outputs, and verifier results for all baseline attempts. Explain the observed difficulty using concrete results, such as incorrect answers, violated constraints, or poor scores relative to the stated target. You may then try iterative refinement, Best-of-N, or an agent-based approach and compare the results with direct prompting. For example, you could implement a ReAct loop or use an existing agent harness to let the model run an experiment, inspect the result, and decide what to try next.
+
+**Free API Access:** **Xiaomi MiMo** is sponsoring API credits for this course. Each enrolled student has been assigned an API key with approximately **RMB 1,000 in credits** to support upcoming assignments. To retrieve your key, connect to the **campus network** and visit [the API key portal](http://10.129.160.194:8000/), then enter your student ID and name. If you have any questions, please contact the instructor or a teaching assistant.
 
 **Harbor implementation.** Place your task in `data/scientific_task/` using the [Harbor task format](https://docs.harborframework.com/tasks/overview):
 
@@ -1023,7 +920,7 @@ harbor run -p data/scientific_task -a oracle
 
 You can follow the [Harbor task tutorial](https://docs.harborframework.com/tutorials/create-a-task) for setup and examples.
 
-> Problem 17, Option B: Your Own Scientific Task (10 points)
+> Problem 17: Finding LLM Failures on Scientific Tasks (10 points)
 >
 > **Deliverables**:
 >
