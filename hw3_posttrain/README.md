@@ -8,7 +8,7 @@ In this assignment, you will gain some hands-on experience with training languag
 
 1. Zero-shot prompting baseline for the GSM8K dataset. Apply Best-of-N to see the strength of test-time scaling.
 2. Group-Relative Policy Optimization (GRPO) for improving reasoning performance with verified rewards.
-3. Design a verifiable scientific or mathematical task and analyze where language models fail on it.
+3. Find an LLM failure on a scientific task and build an agent that reliably solves it.
 
 ## 2. Measuring Zero-shot GSM8K Performance
 
@@ -886,15 +886,19 @@ You will use this prompt for both training and validation, and will change your 
 >
 > - **Deliverable:** Report the validation answer reward curves for both the R1-Zero prompt and the question-only prompt. How do metrics compare, including any other metrics that have a noticeable trend such as entropy, response length, and gradient norm? Try to explain your findings.
 
-## 7. Finding LLM Failures on Scientific Tasks
+## 7. Finding and Resolving LLM Failures on Scientific Tasks
 
-Choose a scientific or mathematical problem that interests you and turn it into a verifiable task. Your goal is to show where language models struggle when prompted directly and explain what went wrong. For example, you could construct a mathematical object satisfying a set of constraints, recover parameters from simulated observations, or solve an optimization problem.
+Choose a scientific or mathematical problem that interests you and turn it into a verifiable task. Your goal is to identify where direct prompting fails and build an agent that reliably solves one of those cases. For example, you could construct a mathematical object satisfying a set of constraints, recover parameters from simulated observations, or solve an optimization problem.
 
 **Task design.** Design the task yourself and explain your contribution to the problem setting, data, constraints, or verification. You may build on existing scientific methods or public data; cite the sources you use. State the task clearly, including the inputs, expected outputs, and success criteria.
 
 **Reference solution and verifier.** Provide a correct reference solution and an automatic verifier. Depending on the task, verification may use a reference answer, a numerical tolerance, or validity conditions and an objective threshold. Multiple correct solutions are allowed. Check that your reference solution passes the verifier and that an incorrect or missing output fails.
 
-**Model baselines.** Evaluate your task using direct prompting on **at least three different LLMs**, and document **failure or clear difficulty on each model**. Use reasonably capable models, such as MiMo or other recent models you have access to. Give each model the task description and required inputs, use reasonable generation budgets, and evaluate its answer or generated program without iterative hints or verifier feedback. Record the exact model names/versions, prompts, generation settings, outputs, and verifier results for all baseline attempts. Explain the observed difficulty using concrete results, such as incorrect answers, violated constraints, or poor scores relative to the stated target. You may then try iterative refinement, Best-of-N, or an agent-based approach and compare the results with direct prompting. For example, you could implement a ReAct loop or use an existing agent harness to let the model run an experiment, inspect the result, and decide what to try next.
+**Model baselines.** Evaluate your task using direct prompting on **at least three different LLMs**, and document **failure or clear difficulty on each model**. Use reasonably capable models, such as MiMo or other recent models you have access to. Give each model the task description and required inputs, use reasonable generation budgets, and evaluate its answer or generated program without iterative hints or verifier feedback. Record the exact model names/versions, prompts, generation settings, outputs, and verifier results for all baseline attempts. Explain the observed difficulty using concrete results, such as incorrect answers, violated constraints, or poor scores relative to the stated target.
+
+**Agent-based problem solving.** Choose a case where a baseline model failed the stated success criteria. Build an agent around that same model to solve the case. You can implement a ReAct-style loop or adapt an existing agent harness. For example, the agent might run a calculation, inspect the result, and revise its answer.
+
+Evaluate the finished agent on the **same input in three consecutive runs**, with the same agent configuration and per-run budget. Start each run with a fresh conversation and workspace, without human hints or access to the reference solution. **All three final outputs must pass the same verifier** under the original success criteria.
 
 **Free API Access:** **Xiaomi MiMo** is sponsoring API credits for this course. Each enrolled student has been assigned an API key with approximately **RMB 1,000 in credits** to support upcoming assignments. To retrieve your key, connect to the **campus network** and visit [the API key portal](http://10.129.160.194:8000/), then enter your student ID and name. If you have any questions, please contact the instructor or a teaching assistant.
 
@@ -920,12 +924,13 @@ harbor run -p data/scientific_task -a oracle
 
 You can follow the [Harbor task tutorial](https://docs.harborframework.com/tutorials/create-a-task) for setup and examples.
 
-> Problem 17: Finding LLM Failures on Scientific Tasks (10 points)
+> Problem 17: Finding and Resolving LLM Failures on Scientific Tasks (10 points)
 >
 > **Deliverables**:
 >
 > 1. **`data/scientific_task/`**: A complete, runnable Harbor task, including the reference solution and automatic verifier.
-> 2. **`conversation_log.json`**: The entire interaction log with the LLMs, including the baseline attempts on at least three different models and any subsequent refinement. Include the model names/versions and generation settings.
-> 3. **`report.md`**: A 1-2 page report explaining the scientific motivation, your contribution to the task design, the reference solution and verification criteria, and the baseline results and failure analysis for each model. Include the result of the Harbor oracle run and discuss any further methods you tried.
+> 2. **`agent/`**: The code and instructions needed to run your agent on the selected failure case.
+> 3. **`conversation_log.json`**: The full interaction logs for the baseline attempts and agent runs. Record model names/versions and generation settings, and include the agent's actions, observations, final outputs, and verifier results for all three evaluation runs.
+> 4. **`report.md`**: A 1-2 page report explaining the scientific motivation, your contribution, the reference solution and verification criteria, and where each baseline model struggled. Include the Harbor oracle result. Explain how your agent addresses the selected failure and compare its three verifier results with the direct-prompting result on that case.
 >
-> **Grading**: Your grade will be based on the scientific motivation and task design, the correctness of the reference solution and verifier, the rigor of the model experiments and analysis, and the completeness of the runnable Harbor task.
+> **Grading**: Your grade will be based on the scientific motivation and task design, the correctness of the runnable Harbor task and its verifier, the baseline failure analysis, and the agent's ability to solve the selected case in all three runs.
